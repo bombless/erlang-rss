@@ -30,8 +30,8 @@ extract_and_print_titles(HtmlString) ->
         {match, Matches} ->
             % Matches 是一个列表，每个元素是匹配到的捕获组列表
             % 例如: [["标题1"], ["标题2"]]
-            Titles = [Title || [Title] <- Matches, Title =/= []], % 提取非空标题
-            lists:foreach(fun(Title) -> io:format("~ts~n", [Title]) end, Titles);
+            io:format("找到 ~p 个新闻标题:~n", [length(Matches)]),
+            lists:foreach(fun(Title) -> io:format("~ts~n", Title) end, Matches);
         nomatch ->
             io:format("No news titles found matching the pattern.~n");
         {error, ErrSpec} ->
