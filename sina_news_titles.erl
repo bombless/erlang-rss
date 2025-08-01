@@ -10,18 +10,7 @@ get_and_print_titles() ->
     Url = "https://news.sina.com.cn",
     case httpc:request(get, {Url, []}, [], []) of
         {ok, {{_, 200, _}, _Headers, Body}} ->
-            % 将二进制数据转换为UTF-8列表（假设是UTF-8编码）
-            % 注意：网页的实际编码应在HTTP头或HTML meta标签中查找
-            % 这里为了简化示例，假设为UTF-8
-            case unicode:characters_to_list(Body, utf8) of
-                {error, _, _} ->
-                    io:format("Error: Failed to decode HTML body as UTF-8.~n");
-                {incomplete, DecodedList, _Rest} ->
-                    io:format("Warning: HTML body decoding was incomplete.~n"),
-                    extract_and_print_titles(DecodedList);
-                DecodedList when is_list(DecodedList) ->
-                    extract_and_print_titles(DecodedList)
-            end;
+            extract_and_print_titles(Body);
         {ok, {{_, StatusCode, _}, _, _}} ->
             io:format("Error: HTTP request failed with status code ~p~n", [StatusCode]);
         {error, Reason} ->
@@ -35,7 +24,7 @@ extract_and_print_titles(HtmlString) ->
     % ([^<]*) 捕获组，匹配任意数量的非 '<' 字符（标题内容）
     % < 匹配结束的 '<'
     % 注意：Erlang的re模块使用PCRE语法，lookbehind语法可能受限，因此使用捕获组和精确匹配
-    Pattern = "\\.shtml\" target=\"_blank\">([^<]*)<",
+    Pattern = "\\.shtml\" target=\"_blank\">([^<]{22,})<",
     Options = [global, {capture, all_but_first, binary}],
     case re:run(HtmlString, Pattern, Options) of
         {match, Matches} ->
